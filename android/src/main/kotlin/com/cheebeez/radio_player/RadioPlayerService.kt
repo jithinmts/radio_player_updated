@@ -146,6 +146,12 @@ class RadioPlayerService : Service(), Player.Listener {
         player.playWhenReady = false
     }
 
+    fun clear() {
+        stopForeground(true)
+        isForegroundService = false
+        stopSelf()
+    }
+
     /** Extract URLs from user link. */
     private fun parseUrls(url: String): List<String> {
         var urls: List<String> = emptyList()
@@ -231,6 +237,7 @@ class RadioPlayerService : Service(), Player.Listener {
             .setNotificationListener(notificationListener)
             .build().apply {
                 setUsePlayPauseActions(true)
+                setUseStopAction(true)
                 setUseFastForwardAction(false)
                 setUseRewindAction(false)
                 setUsePreviousAction(false)

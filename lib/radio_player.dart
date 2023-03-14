@@ -42,6 +42,10 @@ class RadioPlayer {
     await _methodChannel.invokeMethod('pause');
   }
 
+  Future<void> clear() async {
+    await _methodChannel.invokeMethod('clear');
+  }
+
   /// Set default image.
   Future<void> setDefaultArtwork(String image) async {
     final byteData = await rootBundle.load(image);
