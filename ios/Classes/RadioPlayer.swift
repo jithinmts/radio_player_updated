@@ -110,7 +110,6 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         player.pause()
     }
    func clear() {
-       print("!@#123!@# clear")
        NotificationCenter.default.removeObserver(self)
     }
     func runInBackground() {

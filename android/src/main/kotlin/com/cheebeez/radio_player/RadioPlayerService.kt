@@ -147,10 +147,11 @@ class RadioPlayerService : Service(), Player.Listener {
     }
 
     fun clear() {
-        playerNotificationManager?.setPlayer(null)
         stopForeground(true)
         isForegroundService = false
         stopSelf()
+        mediaSession?.release()
+        playerNotificationManager?.setPlayer(null)
     }
 
     /** Extract URLs from user link. */
