@@ -104,6 +104,10 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         player.pause()
     }
 
+    func clear() {
+       NotificationCenter.default.removeObserver(self)
+    }
+
     func runInBackground() {
         try? AVAudioSession.sharedInstance().setActive(true)
         try? AVAudioSession.sharedInstance().setCategory(.playback)
