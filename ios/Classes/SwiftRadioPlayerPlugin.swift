@@ -48,8 +48,6 @@ public class SwiftRadioPlayerPlugin: NSObject, FlutterPlugin {
                 player.stop()
             case "pause":
                 player.pause()
-             case   "clear" :
-                player.clear()
             case "metadata":
                 let metadata = call.arguments as! Array<String>
                 player.setMetadata(metadata)
@@ -58,6 +56,8 @@ public class SwiftRadioPlayerPlugin: NSObject, FlutterPlugin {
                 player.itunesArtworkParser = enable
             case "ignore_icy":
                 player.ignoreIcy = true
+            case   "clear" :
+                player.clear()
             default:
                 result(FlutterMethodNotImplemented)
         }
