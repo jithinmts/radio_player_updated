@@ -58,10 +58,11 @@ public class SwiftRadioPlayerPlugin: NSObject, FlutterPlugin {
                 player.ignoreIcy = true
             case   "clear" :
                 player.clear()
+
             default:
                 result(FlutterMethodNotImplemented)
         }
- 
+
         result(1)
     }
 }

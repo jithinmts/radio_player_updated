@@ -17,7 +17,12 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     var interruptionObserverAdded: Bool = false
 
     func setMediaItem(_ streamTitle: String, _ streamUrl: String) {
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyTitle: streamTitle, ]
+    var songInfo = [:] as [String : Any]
+            songInfo[MPMediaItemPropertyTitle] = streamTitle
+            if #available(iOS 10.0, *) {
+                            songInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
+                        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
         defaultArtwork = nil
         metadataArtwork = nil
         playerItem = AVPlayerItem(url: URL(string: streamUrl)!)
@@ -97,17 +102,17 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
     func stop() {
         player.pause()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         player.replaceCurrentItem(with: nil)
     }
 
     func pause() {
         player.pause()
     }
-
-     func clear() {
-        NotificationCenter.default.removeObserver(self)
+   func clear() {
+       print("!@#123!@# clear")
+       NotificationCenter.default.removeObserver(self)
     }
-
     func runInBackground() {
         try? AVAudioSession.sharedInstance().setActive(true)
         try? AVAudioSession.sharedInstance().setCategory(.playback)
@@ -124,9 +129,10 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         }
 
         // Pause button.
-        commandCenter.pauseCommand.isEnabled = true
-        commandCenter.pauseCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+        commandCenter.stopCommand.isEnabled = true
+        commandCenter.stopCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
             self?.pause()
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
             return .success
         }
     }
@@ -173,7 +179,7 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         let semaphore = DispatchSemaphore(value: 0)
 
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let data = data, error == nil { 
+            if let data = data, error == nil {
                 result = UIImage(data: data)
             }
             semaphore.signal()
@@ -188,7 +194,7 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         var artwork: String = ""
 
         // Generate a request.
-        guard let term = (artist + " - " + track).addingPercentEncoding(withAllowedCharacters: .alphanumerics) 
+        guard let term = (artist + " - " + track).addingPercentEncoding(withAllowedCharacters: .alphanumerics)
         else { return artwork }
 
         guard let url = URL(string: "https://itunes.apple.com/search?term=" + term + "&limit=1")
