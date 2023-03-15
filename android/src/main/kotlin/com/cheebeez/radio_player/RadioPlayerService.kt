@@ -94,11 +94,11 @@ class RadioPlayerService : Service(), Player.Listener {
     }
 
     fun setMediaItem(streamTitle: String, streamUrl: String) {
-        mediaItems = runBlocking { 
-                GlobalScope.async { 
-                    parseUrls(streamUrl).map { MediaItem.fromUri(it) }
-                }.await() 
-            }
+        mediaItems = runBlocking {
+            GlobalScope.async {
+                parseUrls(streamUrl).map { MediaItem.fromUri(it) }
+            }.await()
+        }
 
         currentMetadata = null
         defaultArtwork = null
@@ -112,10 +112,10 @@ class RadioPlayerService : Service(), Player.Listener {
         player.addMediaItems(mediaItems)
     }
 
-    fun setMetadata(metadata: ArrayList<String>) { 
+    fun setMetadata(metadata: ArrayList<String>) {
         // Parse artwork from iTunes.
         if (itunesArtworkParser && metadata[2].isEmpty())
-           metadata[2] = parseArtworkFromItunes(metadata[0], metadata[1])
+            metadata[2] = parseArtworkFromItunes(metadata[0], metadata[1])
 
         currentMetadata = metadata
         playerNotificationManager?.invalidate()
@@ -149,10 +149,9 @@ class RadioPlayerService : Service(), Player.Listener {
     fun clear() {
         stopForeground(true)
         isForegroundService = false
+        playerNotificationManager = null
         stopSelf()
         mediaSession?.release()
-        playerNotificationManager?.setPlayer(null)
-        playerNotificationManager?.invalidate() ?: createNotificationManager()
     }
 
     /** Extract URLs from user link. */
@@ -161,14 +160,15 @@ class RadioPlayerService : Service(), Player.Listener {
 
         when (url.substringAfterLast(".")) {
             "pls" -> {
-                 urls = URL(url).readText().lines().filter { 
-                    it.contains("=http") }.map {
-                        it.substringAfter("=")
-                    }
+                urls = URL(url).readText().lines().filter {
+                    it.contains("=http")
+                }.map {
+                    it.substringAfter("=")
+                }
             }
             "m3u" -> {
                 val content = URL(url).readText().trim()
-                 urls = listOf<String>(content)
+                urls = listOf<String>(content)
             }
             else -> {
                 urls = listOf<String>(url)
@@ -182,7 +182,8 @@ class RadioPlayerService : Service(), Player.Listener {
     private fun createNotificationManager() {
         // Setup media session
         val intent = Intent(Intent.ACTION_MEDIA_BUTTON)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent =
+            PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         mediaSession = MediaSessionCompat(context, "RadioPlayerService", null, pendingIntent)
 
         mediaSession?.let {
@@ -203,28 +204,44 @@ class RadioPlayerService : Service(), Player.Listener {
         val mediaDescriptionAdapter = object : MediaDescriptionAdapter {
             override fun createCurrentContentIntent(player: Player): PendingIntent? {
                 val notificationIntent = Intent()
-                notificationIntent.setClassName(context.packageName, "${context.packageName}.MainActivity")
-                return PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                notificationIntent.setClassName(
+                    context.packageName,
+                    "${context.packageName}.MainActivity"
+                )
+                return PendingIntent.getActivity(
+                    context,
+                    0,
+                    notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             }
+
             override fun getCurrentLargeIcon(player: Player, callback: BitmapCallback): Bitmap? {
                 metadataArtwork = downloadImage(currentMetadata?.get(2))
                 return metadataArtwork ?: defaultArtwork;
             }
+
             override fun getCurrentContentTitle(player: Player): String {
                 return currentMetadata?.get(0) ?: notificationTitle
             }
+
             override fun getCurrentContentText(player: Player): String? {
                 return currentMetadata?.get(1) ?: null
             }
         }
 
         val notificationListener = object : PlayerNotificationManager.NotificationListener {
-            override fun onNotificationPosted(notificationId: Int, notification: Notification, ongoing: Boolean) {
-                if(ongoing && !isForegroundService) {
+            override fun onNotificationPosted(
+                notificationId: Int,
+                notification: Notification,
+                ongoing: Boolean
+            ) {
+                if (ongoing && !isForegroundService) {
                     startForeground(notificationId, notification)
                     isForegroundService = true
                 }
             }
+
             override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
                 stopForeground(true)
                 isForegroundService = false
@@ -233,7 +250,8 @@ class RadioPlayerService : Service(), Player.Listener {
         }
 
         playerNotificationManager = PlayerNotificationManager.Builder(
-            this, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID)
+            this, NOTIFICATION_ID, NOTIFICATION_CHANNEL_ID
+        )
             .setChannelNameResourceId(R.string.channel_name)
             //.setChannelDescriptionResourceId(R.string.notification_Channel_Description)
             .setMediaDescriptionAdapter(mediaDescriptionAdapter)
@@ -291,8 +309,8 @@ class RadioPlayerService : Service(), Player.Listener {
 
         try {
             val url: URL = URL(value)
-            bitmap = runBlocking { 
-                GlobalScope.async { 
+            bitmap = runBlocking {
+                GlobalScope.async {
                     BitmapFactory.decodeStream(url.openStream())
                 }.await()
             }
@@ -307,10 +325,10 @@ class RadioPlayerService : Service(), Player.Listener {
         var artwork: String = ""
 
         try {
-            val term = URLEncoder.encode(artist + " - " + track, "utf-8") 
+            val term = URLEncoder.encode(artist + " - " + track, "utf-8")
 
-            val response = runBlocking { 
-                GlobalScope.async { 
+            val response = runBlocking {
+                GlobalScope.async {
                     URL("https://itunes.apple.com/search?term=" + term + "&limit=1").readText()
                 }.await()
             }
@@ -318,8 +336,9 @@ class RadioPlayerService : Service(), Player.Listener {
             val jsonObject = JSONObject(response)
 
             if (jsonObject.getInt("resultCount") > 0) {
-                val artworkUrl30: String = jsonObject.getJSONArray("results").getJSONObject(0).getString("artworkUrl30")
-                artwork = artworkUrl30.replace("30x30bb","500x500bb")
+                val artworkUrl30: String =
+                    jsonObject.getJSONArray("results").getJSONObject(0).getString("artworkUrl30")
+                artwork = artworkUrl30.replace("30x30bb", "500x500bb")
             }
         } catch (e: Throwable) {
             println(e)
