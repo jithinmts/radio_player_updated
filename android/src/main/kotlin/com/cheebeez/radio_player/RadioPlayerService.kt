@@ -149,8 +149,9 @@ class RadioPlayerService : Service(), Player.Listener {
     fun clear() {
         stopForeground(true)
         isForegroundService = false
-        playerNotificationManager = null
         stopSelf()
+        playerNotificationManager?.setPlayer(null)
+        playerNotificationManager = null
         mediaSession?.release()
     }
 
