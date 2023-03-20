@@ -17,12 +17,7 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     var interruptionObserverAdded: Bool = false
 
     func setMediaItem(_ streamTitle: String, _ streamUrl: String) {
-    var songInfo = [:] as [String : Any]
-            songInfo[MPMediaItemPropertyTitle] = streamTitle
-            if #available(iOS 10.0, *) {
-                            songInfo[MPNowPlayingInfoPropertyIsLiveStream] = true
-                        }
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [MPMediaItemPropertyTitle: streamTitle, ]
         defaultArtwork = nil
         metadataArtwork = nil
         playerItem = AVPlayerItem(url: URL(string: streamUrl)!)
@@ -102,7 +97,6 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
     func stop() {
         player.pause()
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         player.replaceCurrentItem(with: nil)
     }
 
@@ -110,7 +104,9 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         player.pause()
     }
    func clear() {
-       NotificationCenter.default.removeObserver(self)
+        player.pause()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
+        player.replaceCurrentItem(with: nil)
     }
     func runInBackground() {
         try? AVAudioSession.sharedInstance().setActive(true)
@@ -131,7 +127,6 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         commandCenter.stopCommand.isEnabled = true
         commandCenter.stopCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
             self?.pause()
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
             return .success
         }
     }
