@@ -140,6 +140,9 @@ class RadioPlayerService : Service(), Player.Listener {
     fun stop() {
         player.playWhenReady = false
         player.stop()
+        stopForeground(true)
+        isForegroundService = false
+        stopSelf()
     }
 
     fun pause() {

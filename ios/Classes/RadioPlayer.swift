@@ -102,6 +102,7 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
 
     func stop() {
         player.pause()
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         player.replaceCurrentItem(with: nil)
     }
 
