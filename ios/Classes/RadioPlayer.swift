@@ -112,9 +112,11 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         player.pause()
     }
    func clear() {
+        print("clear func");
         try? AVAudioSession.sharedInstance().setActive(false, options: AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
         player.replaceCurrentItem(with: nil)
+        UIApplication.shared.endReceivingRemoteControlEvents()
     }
     func runInBackground() {
         try? AVAudioSession.sharedInstance().setActive(true)
