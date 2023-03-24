@@ -101,21 +101,17 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
     }
 
     func stop() {
-        print("stop func");
         player.pause()
         player.replaceCurrentItem(with: nil)
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = [:]
     }
 
     func pause() {
-        print("Pause func");
         player.pause()
     }
    func clear() {
-        print("clear func");
         try? AVAudioSession.sharedInstance().setActive(false)
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         player.replaceCurrentItem(with: nil)
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
     func runInBackground() {
         try? AVAudioSession.sharedInstance().setActive(true)
@@ -129,7 +125,6 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         commandCenter.playCommand.isEnabled = true
         commandCenter.playCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
             self?.play()
-            print("play");
             return .success
         }
 
@@ -137,7 +132,6 @@ class RadioPlayer: NSObject, AVPlayerItemMetadataOutputPushDelegate {
         commandCenter.stopCommand.isEnabled = true
         commandCenter.stopCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
             self?.pause()
-            print("Pause");
             print(AVAudioSession.interruptionNotification);
             return .success
         }
